@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B.G.GEN | pop ameba graphics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f8f9fa; --card: #ffffff; --text: #111111; --text-sub: #666666; --accent: #0033ff; --border: #eeeeee; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        .app-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        header { margin-bottom: 2rem; display: flex; align-items: baseline; gap: 1rem; }
+        .logo { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; }
+        .logo span { color: var(--text-sub); font-weight: 300; }
+        .subtitle { font-size: 0.9rem; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 2px; }
+        main { display: grid; grid-template-columns: 1fr 350px; gap: 2rem; align-items: start; }
+        .preview-card { background: #fdfdfd; border-radius: 24px; padding: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
+        #svg-container { width: 100%; aspect-ratio: 16 / 10; background: #fff; border-radius: 16px; }
+        .preview-overlay { margin-top: 1rem; display: flex; justify-content: flex-end; }
+        .controls { background: var(--card); padding: 2rem; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+        .control-group { margin-bottom: 1.2rem; }
+        .control-group label { display: block; font-size: 0.75rem; font-weight: 800; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .slider-header { display: flex; justify-content: space-between; align-items: center; }
+        .slider-value { font-size: 0.8rem; font-weight: 900; background: #f0f0f0; padding: 2px 8px; border-radius: 10px; }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .palette-item { aspect-ratio: 1; border-radius: 50%; cursor: pointer; border: 2px solid transparent; background: linear-gradient(135deg, var(--c1), var(--c2)); transition: 0.2s; }
+        .palette-item.active { border-color: #111; transform: scale(1.1); }
+        .divider { height: 1px; background: linear-gradient(to right, transparent, var(--border), transparent); margin: 1.5rem 0; }
+        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .primary-btn { background: linear-gradient(135deg, #111, #333); color: #fff; border: none; padding: 1.2rem; border-radius: 16px; font-weight: 800; cursor: pointer; transition: 0.3s; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .clear-btn { background: #fff; color: #111; border: 1px solid var(--border); padding: 1.2rem; border-radius: 16px; font-weight: 800; cursor: pointer; transition: 0.3s; letter-spacing: 1px; text-transform: uppercase; }
+        .clear-btn:hover { background: #f5f5f5; border-color: #ccc; }
+        .secondary-btn { background: white; border: 1px solid var(--border); padding: 0.8rem 1.5rem; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: #eee; border-radius: 3px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #111; border-radius: 50%; cursor: pointer; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header><div class="logo">B.G.GEN</div><p class="subtitle">pop ameba graphics</p></header>
+        <main>
+            <div class="preview-card">
+                <div id="svg-container"></div>
+                <div class="preview-overlay">
+                    <button id="download-png-btn" class="secondary-btn" style="margin-right:8px; background:#111; color:#fff;">Export PNG (Aesthetic)</button>
+                    <button id="download-btn" class="secondary-btn">Export SVG (Vector)</button>
+                </div>
+            </div>
+            <aside class="controls">
+                <div class="control-group"><label>Color Palette</label><div id="palette-options" class="palette-grid"></div></div>
+                <div class="divider"></div>
+                <div class="control-group"><div class="slider-header"><label>Aura Glow</label><span class="slider-value" id="aura-value">4</span></div><input type="range" id="aura-slider" min="0" max="10" value="4"></div>
+                <div class="control-group"><div class="slider-header"><label>Hue Mix</label><span class="slider-value" id="hue-value">4</span></div><input type="range" id="hue-slider" min="0" max="10" value="4"></div>
+                <div class="control-group"><div class="slider-header"><label>Curve Object</label><span class="slider-value" id="curve-value">3</span></div><input type="range" id="curve-slider" min="0" max="10" value="3"></div>
+                <div class="control-group"><div class="slider-header"><label>Circle</label><span class="slider-value" id="circle-value">3</span></div><input type="range" id="circle-slider" min="0" max="20" value="3"></div>
+                <div class="control-group"><div class="slider-header"><label>Noise</label><span class="slider-value" id="noise-value">20</span></div><input type="range" id="noise-slider" min="0" max="100" value="20"></div>
+                <div class="control-group"><div class="slider-header"><label>Density</label><span class="slider-value" id="density-value">50</span></div><input type="range" id="density-slider" min="0" max="100" value="50"></div>
+                <div class="btn-row">
+                    <button id="clear-btn" class="clear-btn">Clear</button>
+                    <button id="generate-btn" class="primary-btn">Generate</button>
+                </div>
+            </aside>
+        </main>
+    </div>
+    <script>
+        const PALETTES = [
+            { name: 'Cobalt Sky', colors: ['#0033ff', '#66ccff', '#a0d4ff'] },
+            { name: 'Digital Lavender', colors: ['#8c52ff', '#d6a0ff', '#ffd6ff'] },
+            { name: 'Cyber Lime', colors: ['#ccff00', '#00ffcc', '#00cc88'] },
+            { name: 'Solar Flare', colors: ['#ff0055', '#ff6600', '#ffcc00'] },
+            { name: 'Arctic Mist', colors: ['#0077cc', '#00c2ff', '#99eeff'] },
+            { name: 'Deep Onyx', colors: ['#111111', '#555555', '#999999'] },
+            { name: 'Tropical Punch', colors: ['#ff3cac', '#ff8a00', '#00f5ff'] },
+            { name: 'Sunset Rose', colors: ['#ff6b9d', '#ff9a5c', '#ffd6b0'] }
+        ];
+        let currentPalette = PALETTES[0];
+        const NS = 'http://www.w3.org/2000/svg';
+        let state = { aura: [], hue: [], curve: [], circle: [], noise: 20, density: 50 };
+        function svgEl(tag) { return document.createElementNS(NS, tag); }
+        function rand(a, b) { return a + Math.random() * (b - a); }
+        function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function setAttrs(el, attrs) { for (let k in attrs) el.setAttribute(k, attrs[k]); }
+
+        function shiftHue(hex, deg) {
+            let r=parseInt(hex.slice(1,3),16)/255, g=parseInt(hex.slice(3,5),16)/255, b=parseInt(hex.slice(5,7),16)/255;
+            const max=Math.max(r,g,b), min=Math.min(r,g,b); let h,s,l=(max+min)/2;
+            if(max===min){h=s=0;}else{ const d=max-min; s=l>0.5?d/(2-max-min):d/(max+min); if(max===r)h=((g-b)/d+(g<b?6:0))/6; else if(max===g)h=((b-r)/d+2)/6; else h=((r-g)/d+4)/6; }
+            h=(h+deg/360+1)%1; function h2r(p,q,t){ if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<0.5)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p; }
+            let rr,gg,bb; if(s===0){rr=gg=bb=l;}else{ const q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q; rr=h2r(p,q,h+1/3);gg=h2r(p,q,h);bb=h2r(p,q,h-1/3); }
+            return '#'+[rr,gg,bb].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');
+        }
+
+        function createCurveData(W, H) {
+            const cx = rand(W*0.1, W*0.9), cy = rand(H*0.1, H*0.9);
+            const numBlobs = 8 + Math.floor(rand(0, 6));
+            const blobs = Array.from({length: numBlobs}, (_, i) => ({
+                ox: rand(-(120+i*30), 120+i*30), oy: rand(-(120+i*30), 120+i*30), r: rand(100, 300) * (1 - i/numBlobs * 0.5)
+            }));
+            return { cx, cy, blobs, c1: pick(currentPalette.colors), c2: pick(currentPalette.colors), id: Math.random() };
+        }
+
+        function syncState() {
+            const W=1600, H=1000;
+            const t = { aura: parseInt(document.getElementById('aura-slider').value), hue: parseInt(document.getElementById('hue-slider').value), curve: parseInt(document.getElementById('curve-slider').value), circle: parseInt(document.getElementById('circle-slider').value) };
+            state.noise = parseInt(document.getElementById('noise-slider').value); state.density = parseInt(document.getElementById('density-slider').value);
+            while(state.aura.length < t.aura) state.aura.push({ cx: rand(0,W), cy: rand(0,H), rx: rand(300,700), ry: rand(250,600), angle: rand(0,360), color: pick(currentPalette.colors), opacity: rand(0.3,0.6), id: Math.random() });
+            while(state.aura.length > t.aura) state.aura.pop();
+            while(state.hue.length < t.hue) state.hue.push({ cx: rand(0,W), cy: rand(0,H), rx: rand(300,700), ry: rand(250,600), angle: rand(0,360), color: shiftHue(pick(currentPalette.colors), rand(30,180)), opacity: rand(0.2,0.45), id: Math.random() });
+            while(state.hue.length > t.hue) state.hue.pop();
+            while(state.curve.length < t.curve) state.curve.push(createCurveData(W, H));
+            while(state.curve.length > t.curve) state.curve.pop();
+            while(state.circle.length < t.circle) state.circle.push({ cx: rand(0,W), cy: rand(0,H), r: rand(40,200), c1: pick(currentPalette.colors), c2: pick(currentPalette.colors), id: Math.random() });
+            while(state.circle.length > t.circle) state.circle.pop();
+            render();
+        }
+
+        function render() {
+            const W=1600, H=1000; const container = document.getElementById('svg-container'); container.innerHTML = '';
+            const svg = svgEl('svg'); setAttrs(svg, {viewBox: `0 0 ${W} ${H}`, xmlns: NS});
+            const defs = svgEl('defs'); svg.appendChild(defs);
+
+            const gf = svgEl('filter'); gf.setAttribute('id', 'gooey');
+            const gblur = svgEl('feGaussianBlur'); setAttrs(gblur, {in: 'SourceGraphic', stdDeviation: '35', result: 'blur'});
+            const gcm = svgEl('feColorMatrix'); setAttrs(gcm, {in: 'blur', type: 'matrix', values: '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 70 -30'});
+            gf.appendChild(gblur); gf.appendChild(gcm); defs.appendChild(gf);
+
+            const grf = svgEl('filter'); grf.setAttribute('id', 'grain');
+            const grt = svgEl('feTurbulence'); setAttrs(grt, {type: 'fractalNoise', baseFrequency: '0.85', numOctaves: '4'});
+            const grfa = svgEl('feFuncA'); setAttrs(grfa, {type: 'linear', slope: (state.noise/100*0.85).toFixed(2)});
+            const grct = svgEl('feComponentTransfer'); grct.appendChild(grfa); grf.appendChild(grt); grf.appendChild(grct); defs.appendChild(grf);
+            
+            const dVal = state.density / 50; const tf = svgEl('filter'); tf.setAttribute('id', 'density-filter'); const tct = svgEl('feComponentTransfer'); tct.setAttribute('result','gamma-adj');
+            ['R','G','B'].forEach(c => { const fn=svgEl(`feFunc${c}`); setAttrs(fn, {type: 'gamma', exponent: (1/(dVal+0.01)).toFixed(2), amplitude: '1.0'}); tct.appendChild(fn); });
+            tf.appendChild(tct); const satAdjust = 1 + (1 - dVal) * 0.2; const scm = svgEl('feColorMatrix'); setAttrs(scm, {in:'gamma-adj', type:'saturate', values: satAdjust.toFixed(2)});
+            tf.appendChild(scm); defs.appendChild(tf);
+
+            const drawBg = svgEl('rect'); setAttrs(drawBg, {width: W, height: H, fill: '#ffffff'}); svg.appendChild(drawBg);
+            const mainGroup = svgEl('g'); mainGroup.setAttribute('filter', 'url(#density-filter)');
+
+            const auraG = svgEl('g');
+            [...state.aura, ...state.hue].forEach(d => {
+                const gid=`ag_${d.id.toString(36)}`; const g=svgEl('radialGradient'); g.setAttribute('id',gid);
+                const s1=svgEl('stop'); setAttrs(s1, {offset: '0%', 'stop-color': d.color});
+                const s2=svgEl('stop'); setAttrs(s2, {offset: '100%', 'stop-color': '#ffffff', 'stop-opacity': '0'});
+                g.appendChild(s1); g.appendChild(s2); defs.appendChild(g);
+                const e=svgEl('ellipse'); setAttrs(e, {cx: d.cx, cy: d.cy, rx: d.rx, ry: d.ry, transform: `rotate(${d.angle} ${d.cx} ${d.cy})`, fill: `url(#${gid})`, opacity: d.opacity});
+                e.style.filter = 'blur(100px)'; auraG.appendChild(e);
+            });
+            mainGroup.appendChild(auraG);
+
+            state.curve.forEach(d => {
+                const gid=`cvg_${d.id.toString(36)}`; const g=svgEl('linearGradient'); g.setAttribute('id',gid);
+                const s1=svgEl('stop'); setAttrs(s1, {offset: '0%', 'stop-color': d.c1});
+                const s2=svgEl('stop'); setAttrs(s2, {offset: '100%', 'stop-color': d.c2});
+                g.appendChild(s1); g.appendChild(s2); defs.appendChild(g);
+                const itemG = svgEl('g'); itemG.setAttribute('filter', 'url(#gooey)');
+                d.blobs.forEach(b => { const c = svgEl('circle'); setAttrs(c, {cx: d.cx + b.ox, cy: d.cy + b.oy, r: b.r, fill: `url(#${gid})`}); itemG.appendChild(c); });
+                mainGroup.appendChild(itemG);
+            });
+
+            state.circle.forEach(d => {
+                const gid=`cg_${d.id.toString(36)}`; const g=svgEl('linearGradient'); g.setAttribute('id',gid);
+                const s1=svgEl('stop'); setAttrs(s1, {offset: '0%', 'stop-color': d.c1});
+                const s2=svgEl('stop'); setAttrs(s2, {offset: '100%', 'stop-color': d.c2});
+                g.appendChild(s1); g.appendChild(s2); defs.appendChild(g);
+                const c=svgEl('circle'); setAttrs(c, {cx: d.cx, cy: d.cy, r: d.r, fill: `url(#${gid})`, opacity: '0.7'});
+                mainGroup.appendChild(c);
+            });
+
+            svg.appendChild(mainGroup);
+            const overlay = svgEl('rect'); setAttrs(overlay, {width: W, height: H, filter: 'url(#grain)', 'pointer-events': 'none'});
+            svg.appendChild(overlay); container.appendChild(svg);
+        }
+
+        async function downloadPNG() {
+            const svg = document.getElementById('svg-container').querySelector('svg');
+            const data = (new XMLSerializer()).serializeToString(svg);
+            const canvas = document.createElement('canvas'); canvas.width = 3200; canvas.height = 2000;
+            const ctx = canvas.getContext('2d'); const img = new Image(); const blob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'}); const url = URL.createObjectURL(blob);
+            img.onload = () => { ctx.drawImage(img, 0, 0, 3200, 2000); const a = document.createElement('a'); a.href = canvas.toDataURL('image/png'); a.download = `B.G.GEN-${Date.now()}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); };
+            img.src = url;
+        }
+
+        function init() {
+            document.querySelectorAll('input[type="range"]').forEach(s => { s.addEventListener('input', () => { document.getElementById(s.id.replace('-slider', '-value')).textContent = s.value; syncState(); }); });
+            const paletteEl = document.getElementById('palette-options');
+            PALETTES.forEach(p => {
+                const item = document.createElement('div'); item.className = `palette-item ${p.name === currentPalette.name ? 'active' : ''}`; item.style.setProperty('--c1', p.colors[0]); item.style.setProperty('--c2', p.colors[2] || p.colors[1]);
+                item.addEventListener('click', () => { document.querySelectorAll('.palette-item').forEach(e => e.classList.remove('active')); item.classList.add('active'); currentPalette = p; state.aura.forEach(a => a.color = pick(currentPalette.colors)); state.hue.forEach(a => a.color = shiftHue(pick(currentPalette.colors), rand(30,180))); state.curve.forEach(c => { c.c1 = pick(currentPalette.colors); c.c2 = pick(currentPalette.colors); }); state.circle.forEach(c => { c.c1 = pick(currentPalette.colors); c.c2 = pick(currentPalette.colors); }); render(); });
+                paletteEl.appendChild(item);
+            });
+            document.getElementById('generate-btn').addEventListener('click', () => { state.aura=[]; state.hue=[]; state.curve=[]; state.circle=[]; syncState(); });
+            document.getElementById('clear-btn').addEventListener('click', () => {
+                state = { aura: [], hue: [], curve: [], circle: [], noise: 0, density: 50 };
+                document.querySelectorAll('input[type="range"]').forEach(s => { s.value = (s.id === 'density-slider' ? 50 : 0); const v = document.getElementById(s.id.replace('-slider', '-value')); if(v) v.textContent = s.value; });
+                render();
+            });
+            document.getElementById('download-btn').addEventListener('click', () => { const b = new Blob([document.getElementById('svg-container').innerHTML], { type: 'image/svg+xml;charset=utf-8' }); const url = URL.createObjectURL(b); const a = document.createElement('a'); a.href = url; a.download = `B.G.GEN.svg`; document.body.appendChild(a); a.click(); document.body.removeChild(a); });
+            document.getElementById('download-png-btn').addEventListener('click', downloadPNG);
+            syncState();
+        }
+        window.onload = init;
+    </script>
+</body>
+</html>
