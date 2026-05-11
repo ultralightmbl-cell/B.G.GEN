@@ -45,8 +45,7 @@
             <div class="preview-card">
                 <div id="svg-container"></div>
                 <div class="preview-overlay">
-                    <button id="download-png-btn" class="secondary-btn" style="margin-right:8px; background:#111; color:#fff;">Export PNG (Aesthetic)</button>
-                    <button id="download-btn" class="secondary-btn">Export SVG (Vector)</button>
+                    <button id="download-png-btn" class="secondary-btn" style="width:100%; background:#111; color:#fff;">Export PNG (Aesthetic High-Res)</button>
                 </div>
             </div>
             <aside class="controls">
@@ -198,7 +197,6 @@
                 document.querySelectorAll('input[type="range"]').forEach(s => { s.value = (s.id === 'density-slider' ? 50 : 0); const v = document.getElementById(s.id.replace('-slider', '-value')); if(v) v.textContent = s.value; });
                 render();
             });
-            document.getElementById('download-btn').addEventListener('click', () => { const b = new Blob([document.getElementById('svg-container').innerHTML], { type: 'image/svg+xml;charset=utf-8' }); const url = URL.createObjectURL(b); const a = document.createElement('a'); a.href = url; a.download = `B.G.GEN.svg`; document.body.appendChild(a); a.click(); document.body.removeChild(a); });
             document.getElementById('download-png-btn').addEventListener('click', downloadPNG);
             syncState();
         }
